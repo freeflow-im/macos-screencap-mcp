@@ -1,5 +1,8 @@
 # macos-screencap-mcp
 
+[![npm](https://img.shields.io/npm/v/macos-screencap-mcp)](https://www.npmjs.com/package/macos-screencap-mcp)
+[![license](https://img.shields.io/npm/l/macos-screencap-mcp)](LICENSE)
+
 A local MCP server (stdio) for macOS that takes screenshots and records the screen. It is a single native Swift
 binary built on ScreenCaptureKit and has no runtime dependencies.
 
@@ -20,22 +23,49 @@ Example requests to your agent:
 
 ## Requirements
 
-- macOS 15+
-- Xcode / Swift 6 toolchain (to build)
+- macOS 15 or later, on Apple Silicon or Intel
+- Node.js, to run the server with `npx` (not needed if you build from source)
 - **Screen Recording permission** for the app that launches the server (Terminal, iTerm, Claude Desktop, etc.):
   System Settings → Privacy & Security → Screen & System Audio Recording. Restart that app after granting it.
 
 ## Install
 
-The npm package contains a prebuilt universal binary (Apple Silicon and Intel), so you don't need Swift or Xcode.
+The [npm package](https://www.npmjs.com/package/macos-screencap-mcp) contains a prebuilt universal binary, so you
+don't need Swift or Xcode.
 
-Claude Code:
+### Claude Code
 
 ```bash
 claude mcp add screencap --scope user -- npx -y macos-screencap-mcp
 ```
 
-Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+Then run `claude mcp list` to check that it connects, or `/mcp` inside a session.
+
+The command has two halves, split by `--`:
+
+- **Before `--` are options for Claude Code.** `screencap` is the name you give the server; its tools appear as
+  `mcp__screencap__screenshot_window` and so on. `--scope user` makes it available in all your projects. Use
+  `--scope project` to save it to the repo's `.mcp.json` and share it with everyone who clones the repo. Leave
+  the option out to add it to the current project, for you only.
+- **After `--` is the command Claude Code runs to start the server.** `npx` downloads the package and runs it.
+  `-y` skips npx's "Ok to proceed?" prompt, which nobody would see and which would stall startup.
+
+Options:
+
+```bash
+# Save captures somewhere other than ~/Desktop (-e goes before the --)
+claude mcp add screencap --scope user -e SCREENCAP_OUTPUT_DIR=~/Screenshots -- npx -y macos-screencap-mcp
+
+# Lock a specific version, or always fetch the newest with @latest
+claude mcp add screencap --scope user -- npx -y macos-screencap-mcp@0.1.0
+
+# Unregister
+claude mcp remove screencap --scope user
+```
+
+### Claude Desktop
+
+Add this to `~/Library/Application Support/Claude/claude_desktop_config.json`, then restart Claude Desktop:
 
 ```json
 {
@@ -45,11 +75,14 @@ Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json
 }
 ```
 
-Any other MCP client can run it the same way: the command is `npx -y macos-screencap-mcp`, over stdio. To skip
-npx's startup check, install it globally with `npm install -g macos-screencap-mcp` and use the command
-`macos-screencap-mcp`.
+### Other MCP clients
+
+Run `npx -y macos-screencap-mcp` as a stdio server. To skip npx, install the package globally with
+`npm install -g macos-screencap-mcp` and use the command `macos-screencap-mcp`.
 
 ### Build from source
+
+Requires Xcode or the Swift 6 toolchain.
 
 ```bash
 git clone https://github.com/freeflow-im/macos-screencap-mcp.git
@@ -57,11 +90,6 @@ cd macos-screencap-mcp
 swift build -c release
 claude mcp add screencap --scope user -- "$PWD/.build/release/macos-screencap-mcp"
 ```
-
-### Releasing
-
-Bump `version` in `package.json` and `Sources/macos-screencap-mcp/Version.swift` (the build fails if they
-differ), then run `npm publish`. The `prepack` script builds the universal binary into `bin/`.
 
 ## Tools
 
@@ -118,6 +146,9 @@ finalizes them first so the files stay playable.
 
 ## Troubleshooting
 
+- **The server doesn't connect** (`claude mcp list` shows it failing): check that you're on macOS 15 or later and
+  that `npx -y macos-screencap-mcp` starts without errors in a terminal. If it starts, it waits silently for
+  input; press Ctrl-C to exit.
 - **"Could not read screen content"**: the app that launched the server lacks Screen Recording permission. Grant it
   under System Settings → Privacy & Security → Screen & System Audio Recording, then quit and reopen that app.
   Permission belongs to the launching app (e.g. Terminal), not to this binary.
@@ -138,6 +169,13 @@ directly. Interactive selection hands off to the system `screencapture -i` tool.
 | `Sources/macos-screencap-mcp/Capture.swift` | Displays, windows, screenshots, file naming |
 | `Sources/macos-screencap-mcp/Recording.swift` | Screen and window recording |
 | `Sources/macos-screencap-mcp/main.swift` | Tool definitions |
+| `scripts/build-binary.sh` | Builds the universal binary for the npm package |
+
+### Releasing
+
+Bump `version` in `package.json` and `Sources/macos-screencap-mcp/Version.swift` (the build fails if they
+differ), commit, then run `npm publish`. The `prepack` script builds the universal binary into `bin/`. npm can
+take a minute or two to make a new version available.
 
 ## License
 
