@@ -265,7 +265,7 @@ extension CGRect {
     var area: CGFloat { isNull ? 0 : width * height }
 }
 
-MCPServer(name: "macos-screencap-mcp", version: "0.1.0", tools: tools) {
+MCPServer(name: "macos-screencap-mcp", version: serverVersion, tools: tools) {
     for r in await recordings.removeAll() {
         _ = await r.stop()
         log("finalized \(r.id) on shutdown")

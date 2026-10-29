@@ -25,21 +25,14 @@ Example requests to your agent:
 - **Screen Recording permission** for the app that launches the server (Terminal, iTerm, Claude Desktop, etc.):
   System Settings → Privacy & Security → Screen & System Audio Recording. Restart that app after granting it.
 
-## Build
+## Install
 
-```bash
-git clone https://github.com/freeflow-im/macos-screencap-mcp.git
-cd macos-screencap-mcp
-swift build -c release
-# binary: .build/release/macos-screencap-mcp
-```
-
-## Register with an MCP client
+The npm package contains a prebuilt universal binary (Apple Silicon and Intel), so you don't need Swift or Xcode.
 
 Claude Code:
 
 ```bash
-claude mcp add screencap --scope user -- "$PWD/.build/release/macos-screencap-mcp"
+claude mcp add screencap --scope user -- npx -y macos-screencap-mcp
 ```
 
 Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`):
@@ -47,10 +40,28 @@ Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json
 ```json
 {
   "mcpServers": {
-    "screencap": { "command": "/absolute/path/to/.build/release/macos-screencap-mcp" }
+    "screencap": { "command": "npx", "args": ["-y", "macos-screencap-mcp"] }
   }
 }
 ```
+
+Any other MCP client can run it the same way: the command is `npx -y macos-screencap-mcp`, over stdio. To skip
+npx's startup check, install it globally with `npm install -g macos-screencap-mcp` and use the command
+`macos-screencap-mcp`.
+
+### Build from source
+
+```bash
+git clone https://github.com/freeflow-im/macos-screencap-mcp.git
+cd macos-screencap-mcp
+swift build -c release
+claude mcp add screencap --scope user -- "$PWD/.build/release/macos-screencap-mcp"
+```
+
+### Releasing
+
+Bump `version` in `package.json` and `Sources/macos-screencap-mcp/Version.swift` (the build fails if they
+differ), then run `npm publish`. The `prepack` script builds the universal binary into `bin/`.
 
 ## Tools
 
@@ -127,3 +138,7 @@ directly. Interactive selection hands off to the system `screencapture -i` tool.
 | `Sources/macos-screencap-mcp/Capture.swift` | Displays, windows, screenshots, file naming |
 | `Sources/macos-screencap-mcp/Recording.swift` | Screen and window recording |
 | `Sources/macos-screencap-mcp/main.swift` | Tool definitions |
+
+## License
+
+MIT. See [LICENSE](LICENSE).

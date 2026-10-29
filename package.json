@@ -1,0 +1,34 @@
+{
+  "name": "macos-screencap-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for macOS screenshots and screen recordings (regions, windows, whole displays), built on ScreenCaptureKit",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "mcp-server",
+    "macos",
+    "screenshot",
+    "screen-recording",
+    "screencapturekit",
+    "claude"
+  ],
+  "homepage": "https://github.com/freeflow-im/macos-screencap-mcp#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/freeflow-im/macos-screencap-mcp.git"
+  },
+  "bugs": "https://github.com/freeflow-im/macos-screencap-mcp/issues",
+  "license": "MIT",
+  "os": ["darwin"],
+  "cpu": ["arm64", "x64"],
+  "bin": {
+    "macos-screencap-mcp": "bin/macos-screencap-mcp"
+  },
+  "files": [
+    "bin/macos-screencap-mcp"
+  ],
+  "scripts": {
+    "build": "scripts/build-binary.sh",
+    "prepack": "npm run build"
+  }
+}
